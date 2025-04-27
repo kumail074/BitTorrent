@@ -23,7 +23,7 @@ namespace Torrent
             return DecodeNextObject(enumerator);
         }
 
-        public static object DecodeNextObject(IEnumerator<byte> enumerator)
+        private static object DecodeNextObject(IEnumerator<byte> enumerator)
         {
             if (enumerator.Current == DictionaryStart)
                 return DecodeDictionary(enumerator);
@@ -58,6 +58,33 @@ namespace Torrent
             }
             string numAsString = Encoding.UTF8.GetString(bytes.ToArray());
             return Int64.Parse(numAsString);
+        }
+
+        private static byte[] DecodeByteArray(IEnumerator<byte> enumerator)
+        {
+            List<byte> lengthBytes = new List<byte>();
+
+            do
+            {
+                if (enumerator.Current == ByteArrayDivider)
+                    break;
+                lengthBytes.Add(enumerator.Current);
+            } while (enumerator.MoveNext());
+            
+            string lengthString = System.Text.Encoding.UTF8.GetString(lengthBytes.ToArray());
+            int length;
+            if (!Int32.TryParse(lengthString, out length))
+                throw new Exception("unable to parse length of byte array");
+            
+            byte[] bytes = new byte[length];
+
+            for (int i = 0; i < length; i++)
+            {
+                enumerator.MoveNext();
+                bytes[i] = enumerator.Current;
+            }
+
+            return bytes;
         }
     }
 }
