@@ -3,6 +3,7 @@ using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
 
 namespace Torrent
 {
@@ -126,41 +127,61 @@ namespace Torrent
 
             return dict;
         }
+        
+        /* Encoding Process */
+    
+        public static byte[] Encode(object obj)
+        {
+            MemoryStream buffer = new MemoryStream();
+            EncodeNextObject(buffer, obj);
+            return buffer.ToArray();
+        }
+
+        public static void EncodeToFile(object obj, string path)
+        {
+            File.WriteAllBytes(path, Encode(obj));
+        }
+
+        private static void EncodeNextObject(MemoryStream buffer, object obj)
+        {
+            if (obj is byte[])
+                EncodeByteArray(buffer, (byte[])obj);
+        
+            else if (obj is string)
+                EncodeString(buffer, (string)obj);
+        
+            else if (obj is long)
+                EncodeNumber(buffer, ((long)obj));
+        
+            else if (obj.GetType() == typeof(List<object>))
+                EncodeList(buffer, ((List<object>)obj));
+        
+            else if (obj.GetType() == typeof(Dictionary<string, object>))
+                EncodeDictionary(buffer, ((Dictionary<string, object>)obj));
+        
+            else
+                throw new Exception("Unable to encode type: " + obj.GetType());
+        }
+
+        private static void EncodeNumber(MemoryStream buffer, long input)
+        {
+            buffer.Append(NumberStart);
+            buffer.Append(Encoding.UTF8.GetString(Convert.ToString(input)));
+            buffer.Append(NumberEnd);
+        }
     }
     
-    /* Encoding Process */
-    
-    public static byte[] Encode(object obj)
+    public static class MemoryStreamExtensions
     {
-        MemoryStream buffer = new MemoryStream();
-        EncodeNextObject(buffer, obj);
-        return buffer.ToArray();
-    }
+        public static void Append(this MemoryStream stream, byte value)
+        {
+            stream.Append(new[] { value });
+        }
 
-    public static void EncodeToFile(object obj, string path)
-    {
-        File.WriteAllBytes(path, Encode(obj));
-    }
-
-    private static void EncodeNextObject(MemoryStream buffer, object obj)
-    {
-        if (obj is byte[])
-            EncodeByteArray(buffer, (byte[])obj);
-        
-        else if (obj is string)
-            EncodeString(buffer, (string)obj);
-        
-        else if (obj is long)
-            EncodeNumber(buffer, ((long)obj));
-        
-        else if (obj.GetType() == typeof(List<object>))
-            EncodeList(buffer, ((List<object>)obj));
-        
-        else if (obj.GetType() == typeof(Dictionary<string, object>))
-            EncodeDictionary(buffer, ((Dictionary<string, object>)obj));
-        
-        else
-            throw new Exception("Unable to encode type: " + obj.GetType());
+        public static void Append(this MemoryStream stream, byte[] values)
+        {
+            stream.Write(values, 0, values.Length);
+        }
     }
     
     
