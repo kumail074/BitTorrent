@@ -169,7 +169,39 @@ namespace Torrent
             buffer.Append(Encoding.UTF8.GetString(Convert.ToString(input)));
             buffer.Append(NumberEnd);
         }
-    }
+
+        private static void EncodeByteArray(MemoryStream buffer, byte[] body)
+        {
+            buffer.Append(Encoding.UTF8.GetBytes(Convert.ToString(body) ?? throw new InvalidOperationException()));
+            buffer.Append(ByteArrayDivider);
+            buffer.Append(body);
+        }
+
+        private static void EncodeString(MemoryStream buffer, string input)
+        {
+            EncodeByteArray(buffer, Encoding.UTF8.GetBytes(input));
+        }
+
+        private static void EncodeList(MemoryStream buffer, List<object> input)
+        {
+            buffer.Append(ListStart);
+            foreach (var item in input)
+                EncodeNextObject(buffer, item);
+            buffer.Append(ListEnd);
+        }
+
+        private static void EncodeDictionary(MemoryStream buffer, Dictionary<string, object> input)
+        {
+            buffer.Append(DictionaryStart);
+            var sortedkeys = input.Keys.ToList().OrderBy(x => BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
+            foreach (var key in sortedkeys)
+            {
+                EncodeString(buffer, key);
+                EncodeNextObject(buffer, input[key]);
+            }
+            buffer.Append(DictionaryEnd);
+        }
+    }   
     
     public static class MemoryStreamExtensions
     {
