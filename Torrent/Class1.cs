@@ -86,5 +86,46 @@ namespace Torrent
 
             return bytes;
         }
+
+        private static List<object> DecodeList(IEnumerator<byte> enumerator)
+        {
+            List<object> list = new List<object>();
+
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current == ListEnd)
+                    break;
+                list.Add(DecodeNextObject(enumerator));
+            }
+
+            return list;
+        }
+
+        private static Dictionary<string, object> DecodeDictionary(IEnumerator<byte> enumerator)
+        {
+            Dictionary<string, object> dict = new Dictionary<string, object>();
+            List<string> keys = new List<string>();
+
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current == DictionaryEnd)
+                    break;
+
+                string key = Encoding.UTF8.GetString(DecodeByteArray(enumerator));
+                enumerator.MoveNext();
+                object value = DecodeNextObject(enumerator);
+
+                keys.Add(key);
+                dict.Add(key, value)
+            }
+
+            var sortedkeys = keys.OrderBy(x => BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
+            if (!keys.SequenceEqual(sortedkeys))
+                throw new Exception("Error leading dictionary: keys not sorted");
+
+            return dict;
+        }
     }
+    
+    
 }
