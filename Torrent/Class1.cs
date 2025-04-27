@@ -21,6 +21,20 @@ namespace Torrent
             enumerator.MoveNext();
             return DecodeNextObject(enumerator);
         }
+
+        public static object DecodeNextObject(IEnumerator<byte> enumerator)
+        {
+            if (enumerator.Current == DictionaryStart)
+                return DecodeDictionary(enumerator);
+
+            if (enumerator.Current == ListStart)
+                return DecodeList(enumerator);
+            
+            if (enumerator.Current == NumberStart)
+                return DecodeNumber(enumerator);
+
+            return DecodeByteArray(enumerator);
+        }
     }
 }
     
