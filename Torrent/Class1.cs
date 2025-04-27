@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Text;
 using System.Linq;
 using System.Collections.Generic;
@@ -35,13 +36,28 @@ namespace Torrent
 
             return DecodeByteArray(enumerator);
         }
+
+        public static object DecodeFile(string file)
+        {
+            if(!File.Exists(file))
+                throw new FileNotFoundException("File not found" + file);
+
+            byte[] bytes = File.ReadAllBytes(file);
+            return BEncoding.Decode(bytes);
+        }
+
+        public static long DecodeNumber(IEnumerator enumerator)
+        {
+            List<byte> bytes = new List<byte>();
+            while (enumerator.MoveNext())
+            {
+                if (enumerator.Current == NumberEnd)
+                    break;
+
+                bytes.Add(enumerator.Current);
+            }
+            string numAsString = Encoding.UTF8.GetString(bytes.ToArray());
+            return Int64.Parse(numAsString);
+        }
     }
-}
-    
-    
-    
-    
-    
-public class Class1
-{
 }
