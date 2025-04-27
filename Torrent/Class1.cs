@@ -130,4 +130,18 @@ namespace Torrent
     
     /* Encoding Process */
     
+    public static byte[] Encode(object obj)
+    {
+        MemoryStream buffer = new MemoryStream();
+        EncodeNextObject(buffer, obj);
+        return buffer.ToArray();
+    }
+
+    public static void EncodeToFile(object obj, string path)
+    {
+        File.WriteAllBytes(path, Encode(obj));
+    }
+    
+    
+    
 }
