@@ -16,6 +16,7 @@ namespace Torrent
         private static byte NumberEnd = System.Text.Encoding.UTF8.GetBytes("e")[0];
         private static byte ByteArrayDivider = System.Text.Encoding.UTF8.GetBytes(":")[0];
 
+        /*  Decoding Process */
         public static object Decode(byte[] bytes)
         {
             IEnumerator<byte> enumerator = ((IEnumerable<byte>)bytes).GetEnumerator();
@@ -46,7 +47,7 @@ namespace Torrent
             return BEncoding.Decode(bytes);
         }
 
-        public static long DecodeNumber(IEnumerator enumerator)
+        private static long DecodeNumber(IEnumerator<byte> enumerator)
         {
             List<byte> bytes = new List<byte>();
             while (enumerator.MoveNext())
@@ -127,5 +128,6 @@ namespace Torrent
         }
     }
     
+    /* Encoding Process */
     
 }
