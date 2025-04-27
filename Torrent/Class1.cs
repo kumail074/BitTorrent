@@ -117,7 +117,7 @@ namespace Torrent
                 object value = DecodeNextObject(enumerator);
 
                 keys.Add(key);
-                dict.Add(key, value)
+                dict.Add(key, value);
             }
 
             var sortedkeys = keys.OrderBy(x => BitConverter.ToString(Encoding.UTF8.GetBytes(x)));
@@ -140,6 +140,27 @@ namespace Torrent
     public static void EncodeToFile(object obj, string path)
     {
         File.WriteAllBytes(path, Encode(obj));
+    }
+
+    private static void EncodeNextObject(MemoryStream buffer, object obj)
+    {
+        if (obj is byte[])
+            EncodeByteArray(buffer, (byte[])obj);
+        
+        else if (obj is string)
+            EncodeString(buffer, (string)obj);
+        
+        else if (obj is long)
+            EncodeNumber(buffer, ((long)obj));
+        
+        else if (obj.GetType() == typeof(List<object>))
+            EncodeList(buffer, ((List<object>)obj));
+        
+        else if (obj.GetType() == typeof(Dictionary<string, object>))
+            EncodeDictionary(buffer, ((Dictionary<string, object>)obj));
+        
+        else
+            throw new Exception("Unable to encode type: " + obj.GetType());
     }
     
     
