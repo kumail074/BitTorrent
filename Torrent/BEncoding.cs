@@ -7,6 +7,7 @@ using System.Net.Http.Headers;
 
 namespace Torrent
 {
+    /* BEncoding Decoder/Encoder */
     public static class BEncoding
     {
         private static byte DictionaryStart = System.Text.Encoding.UTF8.GetBytes("d")[0];
