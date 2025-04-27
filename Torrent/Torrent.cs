@@ -27,4 +27,27 @@ namespace BitTorrent
        public int PieceSize { get; private set; }
        public byte[][] PieceHashes { get; private set; }
     }
+
+    public class FileItem
+    {
+        public string Path;
+        public long Size;
+        public long Offset;
+        
+        public string FormattedSize
+        {
+            get { return Torrent.BytesToString(Size); }
+        }
+    }
+
+    public class Tracker
+    {
+        public event EventHandler<List<IPEndPoint>> PeerListUpdated;
+        public string Address { get; private set; }
+
+        public Tracker(string address)
+        {
+            Address = address;
+        }
+    }
 }
